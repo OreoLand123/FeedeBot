@@ -1,18 +1,21 @@
 import sqlite3
 import time
+import re
 
-def db():
-    conect = sqlite3.connect("db_feed_count.db")
-    cur = conect.cursor()
-    sqlite_select_query = """SELECT * from feed_count"""
+conect = sqlite3.connect("db_feed_count.db")
+cur = conect.cursor()
+
+def db(table_name):
+    sqlite_select_query = f"""SELECT * from {table_name}"""
     cur.execute(sqlite_select_query)
     records = cur.fetchall()
     return records
 
+
 def list_bd_feed(flag):
     list_name = []
-    records = db()
-    if flag == True:
+    records = db("feed_count")
+    if flag:
         for i in records:
             list_name.append(i)
         list_name = [i[1] for i in list_name]
@@ -25,16 +28,12 @@ def list_bd_feed(flag):
 
 
 def cheak_db_anction(num, name_feed, flag):
-    conect = sqlite3.connect("db_feed_count.db")
-    cur = conect.cursor()
-    sqlite_select_query = """SELECT * from feed_count"""
-    cur.execute(sqlite_select_query)
-    records = cur.fetchall()
+    records = db("feed_count")
     list_count = [i for i in records]
     if flag == True:
         for i in list_count:
             if name_feed in i:
-                if num <= i[4]:
+                if num <= i[4] and num > 0:
                     return True
                 else:
                     res = str(i[3]) + "/" + str(i[4])
@@ -45,7 +44,7 @@ def cheak_db_anction(num, name_feed, flag):
             if name_feed in i:
                 if num <= i[4]:
                     time.sleep(4)
-                    cur.execute('UPDATE feed_count SET remainder = ?  WHERE ID = ?', (i[4] - num, i[0],))
+                    cur.execute('UPDATE feed_count SET remainder = ?   WHERE ID = ?', (i[4] - num, i[0],))
                     conect.commit()
                     return True
                 else:
@@ -58,7 +57,7 @@ def cheak_db_anction(num, name_feed, flag):
 
 def db_title(call):
     index = call[-1]
-    records = db()
+    records = db("feed_count")
     list_title = [i for i in records]
     for i in list_title:
         if int(index) == i[0]:
@@ -67,14 +66,15 @@ def db_title(call):
 
 
 def number_cheak(number):
-    if number == None:
-        return None
-    try:
-        number = int(number)
-        number = str(number)
-        if ([0] == "+" and [1] == "7" and len(number) > 10) or (([0] == "7" or [0] == "8") and len(number) == 11) or len(number) < 10 or len(number) > 10:
-            return False
-        else:
-            return True
-    except ValueError:
+    if len(re.findall(r'\+7\d{10}', number)) and len(number) == 12:
+        return True
+    else:
         return False
+
+def db_register(name, tg_name, tg_id, number):
+    cur.execute(f"INSERT INTO user (tg_id, tg_name, name, number) VALUES (?, ?, ?, ?)", [tg_id, f"@{tg_name}", name, number])
+    conect.commit()
+
+def get_userdata(tg_id):
+    date = list(cur.execute("SELECT name, tg_name, number FROM user WHERE tg_id = ?", [tg_id]).fetchall())
+    return '\n\n'.join(date)

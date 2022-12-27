@@ -1,5 +1,4 @@
 from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup,  InlineKeyboardButton, KeyboardButton
-import functions
 
 
 
@@ -29,3 +28,16 @@ butt_yes = KeyboardButton("Подтвердить заказ")
 butt_no = KeyboardButton("Отменить заказ")
 kb_3 = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 kb_3.row(butt_yes, butt_no)
+
+
+back_inline = InlineKeyboardButton("Назад", callback_data="back_prod")
+butt_back_prod = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(back_inline)
+
+cancel_inline = InlineKeyboardButton("Отказ", callback_data="cancel")
+butt_cancel = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(cancel_inline)
+
+
+causes_inline = InlineKeyboardMarkup()
+causes_list = ['Недозвон', 'Товара нет']
+for i, cause in enumerate(causes_list):
+    causes_inline.add(InlineKeyboardButton(cause, callback_data=f'cause_{i+1}'))
